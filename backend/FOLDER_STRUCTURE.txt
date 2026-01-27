@@ -1,0 +1,90 @@
+backend/
+├── admin/                              # 🎯 ADMIN SYSTEM (NEW)
+│   ├── controllers/                    # Business logic handlers
+│   │   ├── authController.js          # Login, password management
+│   │   ├── dashboardController.js     # Statistics, revenue charts
+│   │   ├── roomController.js          # Room CRUD operations
+│   │   ├── bookingController.js       # Booking management
+│   │   └── guestController.js         # Guest management
+│   │
+│   ├── middleware/                     # Authentication & validation
+│   │   └── auth.js                    # JWT token verification
+│   │
+│   ├── routes/                         # API route definitions
+│   │   ├── authRoutes.js              # /api/admin/auth/*
+│   │   ├── dashboardRoutes.js         # /api/admin/dashboard/*
+│   │   ├── roomRoutes.js              # /api/admin/rooms/*
+│   │   ├── bookingRoutes.js           # /api/admin/bookings/*
+│   │   └── guestRoutes.js             # /api/admin/guests/*
+│   │
+│   ├── utils/                          # Utility scripts
+│   │   ├── setupDatabase.js           # Create database tables
+│   │   └── createAdmin.js             # Create default admin user
+│   │
+│   └── README.md                       # Full admin documentation
+│
+├── config/                             # Configuration files
+│   ├── db.js                          # MongoDB config (old)
+│   └── mysql.js                       # MySQL config (NEW)
+│
+├── controllers/                        # Public API controllers
+│   ├── roomController.js              # Public room listings
+│   └── bookingController.js           # Public booking creation
+│
+├── models/                             # Database models (old Mongoose)
+│   ├── Booking.js                     # ⚠️ Needs update for MySQL
+│   └── Room.js                        # ⚠️ Needs update for MySQL
+│
+├── routes/                             # Public API routes
+│   ├── roomRoutes.js                  # /api/rooms/*
+│   └── bookingRoutes.js               # /api/bookings/*
+│
+├── .env                                # Environment variables
+├── server.js                           # Main application file
+├── package.json                        # Dependencies
+│
+├── testConnection.js                   # MySQL connection tester
+├── deleteAllData.js                    # Delete all data utility
+│
+├── DATABASE_SETUP.md                   # Database migration guide
+└── ADMIN_QUICK_START.md                # Quick start guide
+
+DATABASE TABLES (MySQL - Hostinger):
+├── admins                              # Admin user accounts
+├── guests                              # Guest information
+├── rooms                               # Hotel room details
+└── bookings                            # Booking records
+
+API ENDPOINTS:
+├── Public API
+│   ├── GET    /api/rooms              # List available rooms
+│   └── POST   /api/bookings           # Create booking
+│
+└── Admin API (Protected with JWT)
+    ├── Authentication
+    │   ├── POST   /api/admin/auth/login
+    │   ├── GET    /api/admin/auth/me
+    │   └── PUT    /api/admin/auth/password
+    │
+    ├── Dashboard
+    │   ├── GET    /api/admin/dashboard/stats
+    │   └── GET    /api/admin/dashboard/revenue
+    │
+    ├── Rooms Management
+    │   ├── GET    /api/admin/rooms
+    │   ├── POST   /api/admin/rooms
+    │   ├── GET    /api/admin/rooms/:id
+    │   ├── PUT    /api/admin/rooms/:id
+    │   └── DELETE /api/admin/rooms/:id
+    │
+    ├── Bookings Management
+    │   ├── GET    /api/admin/bookings
+    │   ├── GET    /api/admin/bookings/:id
+    │   ├── PUT    /api/admin/bookings/:id/status
+    │   └── DELETE /api/admin/bookings/:id
+    │
+    └── Guests Management
+        ├── GET    /api/admin/guests
+        ├── GET    /api/admin/guests/:id
+        ├── PUT    /api/admin/guests/:id
+        └── DELETE /api/admin/guests/:id

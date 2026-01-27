@@ -1,22 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, Wifi, Coffee, Car, Utensils, Music, ShieldCheck, ArrowUpRight, X, Users, Maximize } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Wifi, Coffee, Utensils, Car, Users, Maximize, ArrowRight, ArrowUpRight, Heart, ShieldCheck, Clock } from 'lucide-react';
+import { fetchRooms, fetchSettings } from '../api';
 import toast from 'react-hot-toast';
 
 const Home = () => {
-    const [selectedRoom, setSelectedRoom] = useState(null);
+    const [rooms, setRooms] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [config, setConfig] = useState({
+        hero_desktop: '/hero (2).png',
+        hero_mobile: '/hero for mobail.png',
+        elegance_top: '/luxury-suite.png',
+        elegance_bottom: '/luxury-lobby.png',
+        featured_rooms: []
+    });
 
-    const roomData = [
-        { id: 1, name: "Standard Single Room", price: 180, image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", capacity: 1, size: "22m²", desc: "Perfect for solo travelers, featuring a comfortable single bed and a modern workspace.", amenities: ["Free WiFi", "Private Bathroom", "Work Desk", "TV", "Toiletries"] },
-        { id: 2, name: "Deluxe Double Room", price: 250, image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", capacity: 2, size: "30m²", desc: "Spacious room with a queen-sized bed, ideal for couples seeking comfort and style.", amenities: ["Free WiFi", "Private Bathroom", "Sitting Area", "TV", "Room Service"] },
-        { id: 3, name: "Family Suite", price: 420, image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", capacity: 4, size: "50m²", desc: "Expansive suite designed for families, with interconnected rooms and premium facilities.", amenities: ["Free WiFi", "2 Bedrooms", "Large TV", "Mini Bar", "Garden View"] },
-        { id: 4, name: "Premium Twin Room", price: 280, image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bHV4dXJ5JTIwaG90ZWwlMjByb29tfGVufDB8fDB8fHww", capacity: 2, size: "32m²", desc: "Features two comfortable single beds and elegant decor for a relaxing stay.", amenities: ["Free WiFi", "Bright Lighting", "Desk", "Coffee Maker", "Tea Service"] },
-        { id: 5, name: "Luxury King Suite", price: 550, image: "https://images.unsplash.com/photo-1729605412224-147d072d3667?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8bHV4dXJ5JTIwcm9vbXxlbnwwfHwwfHx8MA%3D%3D", capacity: 2, size: "65m²", desc: "Our finest suite with a panoramic view and top-of-the-line luxury finishes.", amenities: ["Free WiFi", "King Bed", "Jacuzzi", "Living Room", "Butler Service"] },
-        { id: 6, name: "Executive Suite", price: 380, image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", capacity: 2, size: "45m²", desc: "Designed for business leaders, combining luxury with a highly functional workspace.", amenities: ["Free WiFi", "Meeting Space", "Nespresso", "Office Chair", "VIP Lounge"] },
-        { id: 7, name: "Garden View Double", price: 230, image: "https://plus.unsplash.com/premium_photo-1661875135365-16aab794632f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8bHV4dXJ5JTIwaG90ZWwlMjByb29tfGVufDB8fDB8fHww", capacity: 2, size: "28m²", desc: "Wake up to our lush manicured gardens in this serene double room.", amenities: ["Free WiFi", "Garden Access", "Patio", "Large Windows", "Relaxing Chair"] },
-        { id: 8, name: "Heritage Suite", price: 480, image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", capacity: 2, size: "55m²", desc: "A blend of history and comfort, featuring original wood panels and modern luxury.", amenities: ["Free WiFi", "Antiques", "Claw-foot Tub", "Fireplace", "Breakfast in Bed"] },
-    ];
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            const [roomsRes, settingsRes] = await Promise.all([
+                fetchRooms(),
+                fetchSettings('home_page')
+            ]);
+
+            let allRooms = [];
+            if (roomsRes.data.success) {
+                allRooms = roomsRes.data.data.map(room => ({
+                    id: room.id,
+                    name: `${room.room_type} - Room ${room.room_number}`,
+                    price: parseFloat(room.price_per_night),
+                    image: (() => {
+                        const imgs = room.images ? (typeof room.images === 'string' ? JSON.parse(room.images) : room.images) : [];
+                        const mainImg = imgs.find(img => img.isMain) || imgs[0];
+                        return mainImg?.url || `https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`;
+                    })(),
+                    capacity: room.capacity,
+                    size: `${Math.floor(20 + room.capacity * 5)}m²`,
+                    desc: room.description || `Experience comfort in our ${room.room_type.toLowerCase()} accommodation.`,
+                    amenities: room.amenities ? room.amenities.split(',').map(a => a.trim()) : ['Free WiFi', 'Private Bathroom', 'TV'],
+                }));
+            }
+
+            if (settingsRes.data.success) {
+                const savedConfig = settingsRes.data.data;
+                setConfig(prev => ({ ...prev, ...savedConfig }));
+
+                if (savedConfig.featured_rooms?.length > 0) {
+                    // Order rooms based on featured_rooms array
+                    const ordered = [];
+                    savedConfig.featured_rooms.forEach(id => {
+                        const r = allRooms.find(room => room.id === parseInt(id));
+                        if (r) ordered.push(r);
+                    });
+
+                    // If less than 8 featured, fill with others
+                    if (ordered.length < 8) {
+                        const others = allRooms.filter(r => !savedConfig.featured_rooms.includes(r.id));
+                        setRooms([...ordered, ...others].slice(0, 8));
+                    } else {
+                        setRooms(ordered.slice(0, 8));
+                    }
+                } else {
+                    setRooms(allRooms.slice(0, 8));
+                }
+            } else {
+                setRooms(allRooms.slice(0, 8));
+            }
+        } catch (error) {
+            console.error('Error loading home data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const highlights = [
         { icon: <Wifi size={24} />, title: "Free WiFi", desc: "High-speed internet throughout the hotel." },
@@ -39,7 +98,7 @@ const Home = () => {
                 <div
                     className="absolute inset-0 bg-cover bg-center hidden md:block"
                     style={{
-                        backgroundImage: "url('/hero (2).png')",
+                        backgroundImage: `url('${config.hero_desktop}')`,
                     }}
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -49,7 +108,7 @@ const Home = () => {
                 <div
                     className="absolute inset-0 bg-cover bg-center md:hidden"
                     style={{
-                        backgroundImage: "url('/hero for mobail.png')",
+                        backgroundImage: `url('${config.hero_mobile}')`,
                     }}
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -95,7 +154,7 @@ const Home = () => {
                                 {/* First Image (Arched Top) */}
                                 <div className="w-[280px] md:w-[350px] h-[400px] md:h-[500px] rounded-t-full border-8 border-white shadow-2xl overflow-hidden z-20 relative">
                                     <img
-                                        src="/luxury-suite.png"
+                                        src={config.elegance_top}
                                         alt="Luxury Suite"
                                         className="w-full h-full object-cover"
                                     />
@@ -104,7 +163,7 @@ const Home = () => {
                                 {/* Second Image (Arched Top, Offset) */}
                                 <div className="absolute -right-16 md:-right-24 bottom-0 w-[240px] md:w-[300px] h-[350px] md:h-[450px] rounded-t-full border-8 border-white shadow-2xl overflow-hidden z-10 hidden md:block">
                                     <img
-                                        src="/luxury-lobby.png"
+                                        src={config.elegance_bottom}
                                         alt="Luxury Lobby"
                                         className="w-full h-full object-cover"
                                     />
@@ -161,115 +220,53 @@ const Home = () => {
             </section>
 
             {/* Our Rooms Section */}
-            <section className="py-24 bg-gray-50">
-                <div className="container mx-auto px-4 md:px-8 text-center mb-16">
-                    <span className="text-accent-gold tracking-widest text-sm font-semibold mb-4 block uppercase font-sans">Accommodations</span>
-                    <h2 className="text-4xl md:text-5xl font-serif">Our Luxurious Rooms</h2>
-                </div>
-
-                <div className="container mx-auto px-4 md:px-8">
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {roomData.map((room) => (
-                            <motion.div
-                                key={room.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: room.id * 0.1 }}
-                                className="bg-white group shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full"
-                            >
-                                <div className="relative overflow-hidden h-64">
-                                    <img
-                                        src={room.image}
-                                        alt={room.name}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold tracking-widest text-gray-900 border border-gold">
-                                        ${room.price}/NIGHT
-                                    </div>
-                                </div>
-                                <div className="p-6 flex flex-col flex-grow text-center">
-                                    <h3 className="text-xl font-serif mb-3 text-gray-900">{room.name}</h3>
-                                    <div className="flex items-center justify-center space-x-4 mb-4 text-gray-400 text-xs tracking-widest">
-                                        <div className="flex items-center"><Users size={14} className="mr-1" /> {room.capacity} GUESTS</div>
-                                        <div className="flex items-center"><Maximize size={14} className="mr-1" /> {room.size}</div>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedRoom(room)}
-                                        className="mt-auto w-full py-3 border border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white transition-all tracking-widest text-[10px] font-bold uppercase"
-                                    >
-                                        BOOK NOW
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
+            {rooms.length > 0 && (
+                <section className="py-24 bg-gray-50">
+                    <div className="container mx-auto px-4 md:px-8 text-center mb-16">
+                        <span className="text-accent-gold tracking-widest text-sm font-semibold mb-4 block uppercase font-sans">Accommodations</span>
+                        <h2 className="text-4xl md:text-5xl font-serif">Our Luxurious Rooms</h2>
                     </div>
-                </div>
-            </section>
 
-            {/* Booking Modal (Copied logic from Rooms page) */}
-            <AnimatePresence>
-                {selectedRoom && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedRoom(null)}
-                            className="absolute inset-0 bg-black bg-opacity-80 backdrop-blur-sm"
-                        ></motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 50 }}
-                            className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none flex flex-col md:flex-row"
-                        >
-                            <button
-                                onClick={() => setSelectedRoom(null)}
-                                className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-lg hover:text-accent-gold transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-
-                            <div className="md:w-1/2">
-                                <img src={selectedRoom.image} alt={selectedRoom.name} className="w-full h-full object-cover min-h-[300px]" />
-                            </div>
-
-                            <div className="md:w-1/2 p-10">
-                                <span className="text-accent-gold tracking-widest text-xs font-bold mb-2 block uppercase font-sans">Booking Confirmation</span>
-                                <h2 className="text-3xl mb-4 font-serif">{selectedRoom.name}</h2>
-                                <div className="flex items-center space-x-4 mb-6 text-gray-500 text-sm">
-                                    <div className="flex items-center"><Users size={16} className="mr-1" /> {selectedRoom.capacity} People</div>
-                                    <div className="flex items-center"><Maximize size={16} className="mr-1" /> {selectedRoom.size}</div>
-                                </div>
-
-                                <p className="text-gray-600 mb-8 text-sm leading-relaxed">{selectedRoom.desc}</p>
-
-                                <form onSubmit={handleBookNow} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] tracking-widest text-gray-400 block mb-1 font-bold">CHECK IN</label>
-                                            <input type="date" className="w-full border-b border-gray-200 py-2 focus:border-accent-gold outline-none text-sm" required />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] tracking-widest text-gray-400 block mb-1 font-bold">CHECK OUT</label>
-                                            <input type="date" className="w-full border-b border-gray-200 py-2 focus:border-accent-gold outline-none text-sm" required />
+                    <div className="container mx-auto px-4 md:px-8">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {rooms.map((room) => (
+                                <motion.div
+                                    key={room.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5 }}
+                                    className="bg-white group shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full"
+                                >
+                                    <div className="relative overflow-hidden h-64">
+                                        <img
+                                            src={room.image}
+                                            alt={room.name}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold tracking-widest text-gray-900 border border-gold">
+                                            ${room.price}/NIGHT
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] tracking-widest text-gray-400 block mb-1 font-bold">FULL NAME</label>
-                                        <input type="text" placeholder="John Doe" className="w-full border-b border-gray-200 py-2 focus:border-accent-gold outline-none text-sm" required />
+                                    <div className="p-6 flex flex-col flex-grow text-center">
+                                        <h3 className="text-xl font-serif mb-3 text-gray-900">{room.name}</h3>
+                                        <div className="flex items-center justify-center space-x-4 mb-4 text-gray-400 text-xs tracking-widest">
+                                            <div className="flex items-center"><Users size={14} className="mr-1" /> {room.capacity} GUESTS</div>
+                                            <div className="flex items-center"><Maximize size={14} className="mr-1" /> {room.size}</div>
+                                        </div>
+                                        <Link
+                                            to={`/rooms/${room.id}`}
+                                            className="mt-auto w-full py-3 border border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white transition-all tracking-widest text-[10px] font-bold uppercase text-center"
+                                        >
+                                            VIEW DETAILS
+                                        </Link>
                                     </div>
-                                    <button type="submit" className="w-full py-4 bg-accent-gold text-white tracking-widest text-xs font-bold hover:bg-opacity-90 transition-all mt-4 uppercase">
-                                        CONFIRM BOOKING - ${selectedRoom.price}/NIGHT
-                                    </button>
-                                </form>
-                            </div>
-                        </motion.div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
-                )}
-            </AnimatePresence>
+                </section>
+            )}
 
             {/* Facilities Grid */}
             <section className="py-20 bg-white">

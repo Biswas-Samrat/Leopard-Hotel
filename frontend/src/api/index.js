@@ -6,6 +6,7 @@ const API = axios.create({
 
 export const fetchRooms = () => API.get('/rooms');
 export const fetchRoom = (id) => API.get(`/rooms/${id}`);
+export const fetchSettings = (key) => API.get(`/admin/settings/${key}`);
 export const createBooking = (bookingData) => API.post('/bookings', bookingData);
 
 export default API;
