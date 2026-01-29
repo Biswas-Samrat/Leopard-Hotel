@@ -12,16 +12,16 @@
 }
 
 .sidebar-header {
-    padding: 2rem 1.5rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
     text-align: center;
 }
 
 .sidebar-header h2 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: var(--secondary);
-    margin-top: 0.75rem;
-    margin-bottom: 0.25rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0px;
 }
 
 .sidebar-header p {

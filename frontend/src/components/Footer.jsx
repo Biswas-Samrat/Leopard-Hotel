@@ -28,6 +28,7 @@ const Footer = () => {
                         <h3 className="text-lg font-serif mb-6 border-b border-gray-800 pb-2 inline-block">Explore</h3>
                         <ul className="space-y-4 text-gray-400 text-sm">
                             <li><Link to="/" className="hover:text-accent-gold transition-colors">Home</Link></li>
+                            <li><Link to="/about" className="hover:text-accent-gold transition-colors">About Us</Link></li>
                             <li><Link to="/rooms" className="hover:text-accent-gold transition-colors">Our Rooms</Link></li>
                             <li><Link to="/contact" className="hover:text-accent-gold transition-colors">Contact Us</Link></li>
                         </ul>

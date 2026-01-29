@@ -108,7 +108,7 @@
     background: white;
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .amenities-cell {

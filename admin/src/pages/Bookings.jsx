@@ -3,6 +3,8 @@ import { bookingsAPI } from '../utils/api';
 import { Search, Filter, Trash2 } from 'lucide-react';
 import '../pages/Rooms.css';
 
+import toast from 'react-hot-toast';
+
 export default function Bookings() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function Bookings() {
             await bookingsAPI.updateStatus(id, newStatus);
             fetchBookings();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error updating status');
+            toast.error(error.response?.data?.message || 'Error updating status');
         }
     };
 
@@ -43,7 +45,7 @@ export default function Bookings() {
             await bookingsAPI.delete(id);
             fetchBookings();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error deleting booking');
+            toast.error(error.response?.data?.message || 'Error deleting booking');
         }
     };
 

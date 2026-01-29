@@ -4,8 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Rooms from './pages/Rooms';
-import Bookings from './pages/Bookings';
-import Guests from './pages/Guests';
+import BookedRooms from './pages/BookedRooms';
 import Settings from './pages/Settings';
 import HomeControl from './pages/HomeControl';
 import Layout from './components/Layout';
@@ -39,9 +38,8 @@ function AppRoutes() {
             }>
                 <Route index element={<Dashboard />} />
                 <Route path="rooms" element={<Rooms />} />
+                <Route path="booked-rooms" element={<BookedRooms />} />
                 <Route path="home-control" element={<HomeControl />} />
-                <Route path="bookings" element={<Bookings />} />
-                <Route path="guests" element={<Guests />} />
                 <Route path="settings" element={<Settings />} />
             </Route>
 

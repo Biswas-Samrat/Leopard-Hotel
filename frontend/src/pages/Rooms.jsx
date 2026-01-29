@@ -14,7 +14,7 @@ const Rooms = () => {
     const [selectedType, setSelectedType] = useState('all');
     const [priceRange, setPriceRange] = useState({ min: '', max: '' });
     const [selectedCapacity, setSelectedCapacity] = useState('');
-    const [showOccupied, setShowOccupied] = useState(true);
+
 
     // Sort state
     const [sortBy, setSortBy] = useState('price-asc');
@@ -70,8 +70,8 @@ const Rooms = () => {
             // Capacity filter
             const matchesCapacity = !selectedCapacity || room.capacity === parseInt(selectedCapacity);
 
-            // Status filter
-            const matchesStatus = showOccupied || room.status === 'available';
+            // Status filter - only available rooms are returned by API now
+            const matchesStatus = room.status === 'available';
 
             return matchesType && matchesPriceMin && matchesPriceMax && matchesCapacity && matchesStatus;
         })
@@ -96,11 +96,11 @@ const Rooms = () => {
         setSelectedType('all');
         setPriceRange({ min: '', max: '' });
         setSelectedCapacity('');
-        setShowOccupied(true);
+
         setSortBy('price-asc');
     };
 
-    const hasActiveFilters = selectedType !== 'all' || priceRange.min || priceRange.max || selectedCapacity || !showOccupied || sortBy !== 'price-asc';
+    const hasActiveFilters = selectedType !== 'all' || priceRange.min || priceRange.max || selectedCapacity || sortBy !== 'price-asc';
 
     if (loading) {
         return (
@@ -231,15 +231,7 @@ const Rooms = () => {
                                     </div>
 
                                     <div className="flex items-center justify-between mt-6">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={showOccupied}
-                                                onChange={(e) => setShowOccupied(e.target.checked)}
-                                                className="w-4 h-4 accent-accent-gold"
-                                            />
-                                            <span className="text-sm text-gray-600">Show occupied rooms</span>
-                                        </label>
+
 
                                         {hasActiveFilters && (
                                             <button
@@ -279,27 +271,22 @@ const Rooms = () => {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                className="bg-white rounded-none overflow-hidden shadow-lg flex flex-col md:flex-row h-full group"
+                                className="bg-white rounded-none overflow-hidden shadow-lg flex flex-col md:flex-row md:h-[250px] group"
                             >
-                                <div className="md:w-1/2 relative overflow-hidden">
+                                <div className="md:w-1/2 relative overflow-hidden h-40 md:h-full">
                                     <img
                                         src={room.image}
                                         alt={room.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
-                                    {room.status === 'occupied' && (
-                                        <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 text-xs font-bold">
-                                            OCCUPIED
-                                        </div>
-                                    )}
                                     {room.status === 'available' && (
                                         <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 text-xs font-bold">
                                             AVAILABLE
                                         </div>
                                     )}
                                 </div>
-                                <div className="md:w-1/2 p-8 flex flex-col">
-                                    <div className="flex justify-between items-start mb-4">
+                                <div className="md:w-1/2 p-4 flex flex-col justify-between">
+                                    <div className="flex justify-between items-start mb-2">
                                         <div>
                                             <p className="text-xs text-accent-gold tracking-wider mb-1">{room.room_type.toUpperCase()}</p>
                                             <h3 className="text-2xl font-serif">Room {room.room_number}</h3>
@@ -309,9 +296,9 @@ const Rooms = () => {
                                             <span className="text-xs text-gray-400 font-normal block">/ night</span>
                                         </div>
                                     </div>
-                                    <p className="text-gray-500 text-sm mb-6 flex-grow">{room.desc}</p>
+                                    <p className="text-gray-500 text-[11px] mb-2 line-clamp-2">{room.desc}</p>
 
-                                    <div className="flex items-center space-x-6 mb-8 text-gray-400 text-xs tracking-widest">
+                                    <div className="flex items-center space-x-4 mb-2 text-gray-400 text-[9px] tracking-widest">
                                         <div className="flex items-center">
                                             <Users size={16} className="mr-2" /> {room.capacity} GUESTS
                                         </div>
@@ -322,7 +309,7 @@ const Rooms = () => {
 
                                     <Link
                                         to={`/rooms/${room.id}`}
-                                        className={`w-full py-4 border transition-all tracking-widest text-sm text-center font-medium ${room.status === 'available'
+                                        className={`w-full py-3 border transition-all tracking-widest text-xs text-center font-medium ${room.status === 'available'
                                             ? 'border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white'
                                             : 'border-gray-300 text-gray-400 cursor-not-allowed pointer-events-none'
                                             }`}

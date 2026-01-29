@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { roomsAPI, uploadAPI } from '../utils/api';
 import { Plus, Edit, Trash2, Search, Filter, SlidersHorizontal, Image as ImageIcon, X, Trash, Check, Star } from 'lucide-react';
+import toast from 'react-hot-toast';
 import './Rooms.css';
 
 export default function Rooms() {
@@ -9,6 +10,7 @@ export default function Rooms() {
     const [showModal, setShowModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteRoomId, setDeleteRoomId] = useState(null);
 
     // Filter states
     const [statusFilter, setStatusFilter] = useState('');
@@ -41,13 +43,20 @@ export default function Rooms() {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this room?')) return;
+        setDeleteRoomId(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteRoomId) return;
 
         try {
-            await roomsAPI.delete(id);
+            await roomsAPI.delete(deleteRoomId);
+            toast.success('Room deleted successfully');
             fetchRooms();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error deleting room');
+            toast.error(error.response?.data?.message || 'Error deleting room');
+        } finally {
+            setDeleteRoomId(null);
         }
     };
 
@@ -155,7 +164,7 @@ export default function Rooms() {
                             >
                                 <option value="">All Status</option>
                                 <option value="available">Available</option>
-                                <option value="occupied">Occupied</option>
+                                <option value="booked">Booked</option>
                                 <option value="maintenance">Maintenance</option>
                             </select>
                         </div>
@@ -345,6 +354,97 @@ export default function Rooms() {
                     onSuccess={() => { setShowModal(false); fetchRooms(); }}
                 />
             )}
+
+            {/* Room Delete Confirmation Dialog */}
+            {deleteRoomId && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                }} onClick={() => setDeleteRoomId(null)}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        borderRadius: '0.5rem',
+                        width: '100%',
+                        maxWidth: '400px',
+                        padding: '2rem',
+                        boxShadow: 'var(--shadow-lg)',
+                        position: 'relative',
+                        textAlign: 'center'
+                    }} onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setDeleteRoomId(null)}
+                            style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                border: 'none',
+                                background: 'none',
+                                cursor: 'pointer',
+                                color: '#64748b'
+                            }}
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div style={{
+                            backgroundColor: '#fee2e2',
+                            width: '3rem',
+                            height: '3rem',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 1.5rem',
+                            color: '#ef4444'
+                        }}>
+                            <Trash2 size={24} />
+                        </div>
+
+                        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>
+                            Do you want to delete the room?
+                        </h3>
+                        <p style={{ color: '#64748b', marginBottom: '2rem', fontSize: '0.875rem' }}>
+                            This action cannot be undone. All data related to this room will be permanently removed.
+                        </p>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                            <button
+                                onClick={() => setDeleteRoomId(null)}
+                                style={{
+                                    padding: '0.75rem',
+                                    backgroundColor: '#f1f5f9',
+                                    color: '#1e293b',
+                                    border: 'none',
+                                    borderRadius: '0.25rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                No
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                style={{
+                                    padding: '0.75rem',
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '0.25rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Yes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -402,7 +502,7 @@ function RoomModal({ room, onClose, onSuccess }) {
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length + existingImages.length > 10) {
-            alert('Maximum 10 photos allowed per room');
+            toast.error('Maximum 10 photos allowed per room');
             return;
         }
         setSelectedFiles(prev => [...prev, ...files]);
@@ -420,7 +520,7 @@ function RoomModal({ room, onClose, onSuccess }) {
             await uploadAPI.deleteRoomImage(room.id, publicId);
             setExistingImages(prev => prev.filter(img => img.publicId !== publicId));
         } catch (error) {
-            alert('Error removing image');
+            toast.error('Error removing image');
             console.error(error);
         } finally {
             setUploading(false);
@@ -436,7 +536,7 @@ function RoomModal({ room, onClose, onSuccess }) {
             await roomsAPI.update(room.id, { images: JSON.stringify(updatedImages) });
             setExistingImages(updatedImages);
         } catch (error) {
-            alert('Error updating image selection');
+            toast.error('Error updating image selection');
         }
     };
 
@@ -450,7 +550,7 @@ function RoomModal({ room, onClose, onSuccess }) {
             await roomsAPI.update(room.id, { images: JSON.stringify(updatedImages) });
             setExistingImages(updatedImages);
         } catch (error) {
-            alert('Error setting main image');
+            toast.error('Error setting main image');
         }
     };
 
@@ -487,7 +587,7 @@ function RoomModal({ room, onClose, onSuccess }) {
             onSuccess();
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.message || 'Error saving room';
-            alert(`Failed to save room: ${errorMsg}`);
+            toast.error(errorMsg);
             console.error('Room save error details:', error.response?.data || error);
         } finally {
             setSaving(false);
@@ -564,7 +664,7 @@ function RoomModal({ room, onClose, onSuccess }) {
                             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                         >
                             <option value="available">Available</option>
-                            <option value="occupied">Occupied</option>
+                            <option value="booked">Booked</option>
                             <option value="maintenance">Maintenance</option>
                         </select>
                     </div>
@@ -686,5 +786,5 @@ function RoomModal({ room, onClose, onSuccess }) {
 }
 
 function getStatusColor(status) {
-    return status === 'available' ? 'success' : status === 'occupied' ? 'warning' : 'danger';
+    return status === 'available' ? 'success' : status === 'booked' ? 'warning' : 'danger';
 }

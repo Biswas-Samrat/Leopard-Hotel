@@ -5,9 +5,14 @@ const {
     getRoom,
     createRoom,
     updateRoom,
-    deleteRoom
+    deleteRoom,
+    getBookedRooms
 } = require('../controllers/roomController');
 const { protect } = require('../middleware/auth');
+
+// Booked rooms route must come before /:id
+router.route('/booked')
+    .get(protect, getBookedRooms);
 
 // All routes are protected
 router.route('/')

@@ -210,9 +210,14 @@ const Home = () => {
                                 </p>
                             </div>
 
-                            <div className="pt-8 border-t border-gray-100 italic text-gray-400 font-serif text-lg">
+                            <div className="pt-8 border-t border-gray-100 italic text-gray-400 font-serif text-lg mb-8">
                                 "Our legacy is built on the art of personalized service, where every detail is tailored to create an unforgettable stay for our cherished guests."
                             </div>
+
+                            <Link to="/about" className="inline-flex items-center text-accent-gold tracking-widest text-xs font-bold uppercase group">
+                                LEARN MORE ABOUT US
+                                <ArrowRight size={16} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
+                            </Link>
                         </motion.div>
 
                     </div>

@@ -18,7 +18,8 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Rooms', path: '/rooms' },
-        { name: 'Contact', path: '/contact' },
+        { name: 'About', path: '/about' },
+        { name: 'Contact', path: '/contact' }
     ];
 
     const isHomePage = location.pathname === '/';
@@ -26,13 +27,13 @@ const Navbar = () => {
     return (
         <nav
             className={`fixed w-full z-50 transition-all duration-300 ${scrolled
-                ? (isHomePage ? 'bg-white/70 backdrop-blur-md shadow-md py-4' : 'bg-white shadow-md py-4')
-                : (isHomePage ? 'bg-transparent py-6' : 'bg-white shadow-md py-4')
+                ? 'bg-white/70 backdrop-blur-md shadow-md py-2'
+                : (isHomePage ? 'bg-white/10 backdrop-blur-md py-4' : 'bg-white/80 backdrop-blur-md shadow-md py-2')
                 }`}
         >
             <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
                 <Link to="/" className="flex items-center">
-                    <img src="/logo (4).png" alt="Leopard Hotel Logo" className="h-14 w-auto object-contain" />
+                    <img src="/logo (4).png" alt="Leopard Hotel Logo" className="h-10 w-auto object-contain" />
                 </Link>
 
                 {/* Desktop Links */}

@@ -6,9 +6,9 @@ const { pool } = require(path.join(__dirname, '../../backend/config/mysql'));
 // @access  Private (Admin)
 exports.getDashboardStats = async (req, res) => {
     try {
-        // Get total bookings
+        // Get active bookings (only those where the room is currently marked as booked)
         const [bookingCount] = await pool.query(
-            'SELECT COUNT(*) as total FROM bookings'
+            "SELECT COUNT(*) as total FROM bookings b JOIN rooms r ON b.room_id = r.id WHERE r.status IN ('booked', 'occupied') AND b.status != 'cancelled'"
         );
 
         // Get total rooms
@@ -16,9 +16,9 @@ exports.getDashboardStats = async (req, res) => {
             'SELECT COUNT(*) as total FROM rooms'
         );
 
-        // Get total guests
+        // Get active guests (only those currently checked in or in a booked room)
         const [guestCount] = await pool.query(
-            'SELECT COUNT(*) as total FROM guests'
+            "SELECT COUNT(DISTINCT guest_id) as total FROM bookings b JOIN rooms r ON b.room_id = r.id WHERE r.status IN ('booked', 'occupied') AND b.status != 'cancelled'"
         );
 
         // Get revenue (assuming bookings have a total_amount field)
@@ -38,24 +38,28 @@ exports.getDashboardStats = async (req, res) => {
 
         // Get occupancy rate
         const [occupiedRooms] = await pool.query(
-            'SELECT COUNT(*) as total FROM rooms WHERE status = "occupied"'
+            'SELECT COUNT(*) as total FROM rooms WHERE status IN ("booked", "occupied")'
         );
 
         const totalRooms = roomCount[0].total;
+        const occupiedCount = occupiedRooms[0].total;
         const occupancy = totalRooms > 0
-            ? ((occupiedRooms[0].total / totalRooms) * 100).toFixed(2)
+            ? ((occupiedCount / totalRooms) * 100).toFixed(2)
             : 0;
+
+        // Only show active bookings/guests if there are actually occupied rooms
+        const finalBookingCount = occupiedCount > 0 ? bookingCount[0].total : 0;
+        const finalGuestCount = occupiedCount > 0 ? guestCount[0].total : 0;
 
         res.json({
             success: true,
             stats: {
-                totalBookings: bookingCount[0].total,
-                totalRooms: roomCount[0].total,
-                totalGuests: guestCount[0].total,
+                totalBookings: finalBookingCount,
+                totalRooms: totalRooms,
+                totalGuests: finalGuestCount,
                 totalRevenue: revenue[0].total,
                 occupancyRate: occupancy
-            },
-            recentBookings
+            }
         });
 
     } catch (error) {

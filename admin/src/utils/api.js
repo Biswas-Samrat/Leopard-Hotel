@@ -50,6 +50,7 @@ export const dashboardAPI = {
 // Rooms API
 export const roomsAPI = {
     getAll: () => api.get('/admin/rooms'),
+    getBooked: () => api.get('/admin/rooms/booked'),
     getOne: (id) => api.get(`/admin/rooms/${id}`),
     create: (data) => api.post('/admin/rooms', data),
     update: (id, data) => api.put(`/admin/rooms/${id}`, data),

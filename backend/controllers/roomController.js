@@ -7,8 +7,8 @@ const { pool } = require(path.join(__dirname, '../config/mysql'));
 exports.getRooms = async (req, res, next) => {
     try {
         const [rooms] = await pool.query(
-            'SELECT id, room_number, room_type, capacity, price_per_night, status, description, amenities, images FROM rooms WHERE status != ?',
-            ['maintenance'] // Only show available and occupied rooms to public
+            'SELECT id, room_number, room_type, capacity, price_per_night, status, description, amenities, images FROM rooms WHERE status = ?',
+            ['available'] // Only show available rooms to public
         );
 
         // Parse images JSON for each room

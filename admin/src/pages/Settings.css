@@ -76,4 +76,8 @@
     .settings-grid {
         grid-template-columns: 1fr;
     }
+
+    .settings-card {
+        padding: 1.5rem;
+    }
 }

@@ -36,13 +36,33 @@
     color: var(--secondary);
 }
 
+.mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: -0.5rem;
+}
+
 @media (max-width: 768px) {
     .header-content {
         padding: 1rem;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .mobile-toggle {
+        display: block;
+    }
+
+    .header-actions {
+        margin-left: auto;
     }
 
     .header-title h1 {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
     }
 
     .header-user span {

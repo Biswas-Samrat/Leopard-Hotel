@@ -1,21 +1,20 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home } from 'lucide-react';
+import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home, CheckCircle } from 'lucide-react';
 import './Sidebar.css';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen }) {
     const menuItems = [
         { path: '/', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/rooms', label: 'Rooms', icon: Bed },
+        { path: '/booked-rooms', label: 'Booked Rooms', icon: CheckCircle },
         { path: '/home-control', label: 'Home Control', icon: Home },
-        { path: '/bookings', label: 'Bookings', icon: Calendar },
-        { path: '/guests', label: 'Guests', icon: Users },
         { path: '/settings', label: 'Settings', icon: Settings },
     ];
 
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${isOpen ? 'active' : ''}`}>
             <div className="sidebar-header">
-                <Hotel size={32} color="var(--primary)" />
+                <Hotel size={24} color="var(--primary)" />
                 <h2>Leopard Hotel</h2>
                 <p>Admin Panel</p>
             </div>

@@ -206,19 +206,7 @@ exports.deleteRoom = async (req, res) => {
             });
         }
 
-        // Check if room has active bookings
-        const [activeBookings] = await pool.query(
-            'SELECT id FROM bookings WHERE room_id = ? AND status IN ("pending", "confirmed")',
-            [req.params.id]
-        );
-
-        if (activeBookings.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cannot delete room with active bookings'
-            });
-        }
-
+        // Delete the room (MySQL will cascade delete associated bookings)
         await pool.query('DELETE FROM rooms WHERE id = ?', [req.params.id]);
 
         res.json({
@@ -234,4 +222,48 @@ exports.deleteRoom = async (req, res) => {
             error: error.message
         });
     }
+};
+
+// @desc    Get all booked rooms with details
+// @route   GET /api/admin/rooms/booked
+// @access  Private (Admin)
+exports.getBookedRooms = async (req, res) => {
+    try {
+        const [rooms] = await pool.query(
+            `SELECT r.*, b.check_in, b.check_out, b.num_guests, b.special_requests, g.name as guest_name, g.email as guest_email, g.phone as guest_phone
+             FROM rooms r
+             LEFT JOIN bookings b ON r.id = b.room_id 
+                AND b.id = (
+                    SELECT id FROM bookings 
+                    WHERE room_id = r.id 
+                    AND status != 'cancelled' 
+                    ORDER BY created_at DESC 
+                    LIMIT 1
+                )
+             LEFT JOIN guests g ON b.guest_id = g.id
+             WHERE r.status IN ('booked', 'occupied', 'Booked')`
+        );
+
+        res.json({
+            success: true,
+            count: rooms.length,
+            data: rooms
+        });
+    } catch (error) {
+        console.error('Get booked rooms error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    getAllRooms: exports.getAllRooms,
+    getRoom: exports.getRoom,
+    createRoom: exports.createRoom,
+    updateRoom: exports.updateRoom,
+    deleteRoom: exports.deleteRoom,
+    getBookedRooms: exports.getBookedRooms
 };

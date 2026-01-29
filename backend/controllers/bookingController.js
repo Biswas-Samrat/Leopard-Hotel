@@ -31,10 +31,10 @@ exports.createBooking = async (req, res, next) => {
 
         const room = rooms[0];
 
-        if (room.status === 'occupied') {
+        if (room.status !== 'available') {
             return res.status(400).json({
                 success: false,
-                message: 'Room is currently occupied'
+                message: 'Room is not available for booking'
             });
         }
 
@@ -72,6 +72,12 @@ exports.createBooking = async (req, res, next) => {
             `INSERT INTO bookings (room_id, guest_id, check_in, check_out, num_guests, total_amount, special_requests, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [room_id, guestId, check_in, check_out, guests || 1, total_price, special_requests || null, 'pending']
+        );
+
+        // Update room status to 'booked'
+        await pool.query(
+            'UPDATE rooms SET status = ? WHERE id = ?',
+            ['booked', room_id]
         );
 
         // Get the created booking with room and guest details

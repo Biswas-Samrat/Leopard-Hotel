@@ -3,6 +3,8 @@ import { guestsAPI } from '../utils/api';
 import { Search, Edit, Trash2, Eye } from 'lucide-react';
 import '../pages/Rooms.css';
 
+import toast from 'react-hot-toast';
+
 export default function Guests() {
     const [guests, setGuests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function Guests() {
             await guestsAPI.delete(id);
             fetchGuests();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error deleting guest');
+            toast.error(error.response?.data?.message || 'Error deleting guest');
         }
     };
 
@@ -47,7 +49,7 @@ export default function Guests() {
                 setShowDetailModal(true);
             }
         } catch (error) {
-            alert('Error loading guest details');
+            toast.error('Error loading guest details');
         }
     };
 
