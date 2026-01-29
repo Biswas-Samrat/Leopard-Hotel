@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { authAPI } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 import { Lock, User, Mail } from 'lucide-react';
 import './Settings.css';
 
 export default function Settings() {
+    const { user } = useAuth();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,11 +56,11 @@ export default function Settings() {
                     <div className="info-grid">
                         <div className="info-item">
                             <label>Name</label>
-                            <p>{JSON.parse(localStorage.getItem('adminUser') || '{}').name || 'Admin'}</p>
+                            <p>{user?.name || 'Admin'}</p>
                         </div>
                         <div className="info-item">
                             <label>Email</label>
-                            <p>{JSON.parse(localStorage.getItem('adminUser') || '{}').email || 'N/A'}</p>
+                            <p>{user?.email || 'N/A'}</p>
                         </div>
                     </div>
                 </div>

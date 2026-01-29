@@ -13,7 +13,13 @@ export const AuthProvider = ({ children }) => {
         const savedUser = localStorage.getItem('adminUser');
 
         if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (e) {
+                // Invalid JSON - clear storage
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminUser');
+            }
         }
         setLoading(false);
     }, []);
