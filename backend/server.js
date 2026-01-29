@@ -33,13 +33,13 @@ app.use('/api/rooms', require('./routes/roomRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 
 // Admin Routes
-app.use('/api/admin/auth', require('../admin/routes/authRoutes'));
-app.use('/api/admin/dashboard', require('../admin/routes/dashboardRoutes'));
-app.use('/api/admin/rooms', require('../admin/routes/roomRoutes'));
-app.use('/api/admin/bookings', require('../admin/routes/bookingRoutes'));
-app.use('/api/admin/guests', require('../admin/routes/guestRoutes'));
-app.use('/api/admin/upload', require('../admin/routes/uploadRoutes'));
-app.use('/api/admin/settings', require('../admin/routes/settingsRoutes'));
+app.use('/api/admin/auth', require('./admin/routes/authRoutes'));
+app.use('/api/admin/dashboard', require('./admin/routes/dashboardRoutes'));
+app.use('/api/admin/rooms', require('./admin/routes/roomRoutes'));
+app.use('/api/admin/bookings', require('./admin/routes/bookingRoutes'));
+app.use('/api/admin/guests', require('./admin/routes/guestRoutes'));
+app.use('/api/admin/upload', require('./admin/routes/uploadRoutes'));
+app.use('/api/admin/settings', require('./admin/routes/settingsRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
