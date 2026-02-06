@@ -89,6 +89,25 @@ export const uploadAPI = {
     getRoomImages: (roomId) => api.get(`/admin/upload/room/${roomId}/images`)
 };
 
+// Hospitality API
+export const hospitalityAPI = {
+    getRestaurantBookings: () => api.get('/admin/hospitality/restaurant'),
+    updateRestaurantBookingStatus: (id, status) => api.put(`/admin/hospitality/restaurant/${id}/status`, { status }),
+    deleteRestaurantBooking: (id) => api.delete(`/admin/hospitality/restaurant/${id}`),
+    getPubBookings: () => api.get('/admin/hospitality/pub'),
+    updatePubBookingStatus: (id, status) => api.put(`/admin/hospitality/pub/${id}/status`, { status }),
+    deletePubBooking: (id) => api.delete(`/admin/hospitality/pub/${id}`),
+    getFunctionBookings: () => api.get('/admin/hospitality/function'),
+    updateFunctionBookingStatus: (id, status) => api.put(`/admin/hospitality/function/${id}/status`, { status }),
+    deleteFunctionBooking: (id) => api.delete(`/admin/hospitality/function/${id}`),
+};
+
+// Connection API
+export const connectionAPI = {
+    getMessages: () => api.get('/admin/connection'),
+    deleteMessage: (id) => api.delete(`/admin/connection/${id}`),
+};
+
 // Settings API
 export const settingsAPI = {
     get: (key) => api.get(`/admin/settings/${key}`),

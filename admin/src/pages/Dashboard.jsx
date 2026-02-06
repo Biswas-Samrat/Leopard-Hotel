@@ -1,26 +1,52 @@
 import { useState, useEffect } from 'react';
-import { dashboardAPI } from '../utils/api';
-import { Bed, Calendar, Users, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { dashboardAPI, hospitalityAPI } from '../utils/api';
+import { useAdmin } from '../context/AdminContext';
+import { Bed, Calendar, Users, TrendingUp, Utensils, Beer, Clock } from 'lucide-react';
 import './Dashboard.css';
 
 export default function Dashboard() {
+    const { activeSection } = useAdmin();
     const [stats, setStats] = useState(null);
-    const [recentBookings, setRecentBookings] = useState([]);
+    const [hospitalityStats, setHospitalityStats] = useState({ count: 0 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchDashboardData();
-    }, []);
+        setLoading(true);
+        if (activeSection === 'hotel') {
+            fetchHotelStats();
+        } else {
+            fetchHospitalityStats(activeSection);
+        }
+    }, [activeSection]);
 
-    const fetchDashboardData = async () => {
+    const fetchHotelStats = async () => {
         try {
             const response = await dashboardAPI.getStats();
             if (response.data.success) {
                 setStats(response.data.stats);
-                setRecentBookings(response.data.recentBookings || []);
             }
         } catch (error) {
-            console.error('Error fetching dashboard data:', error);
+            console.error('Error fetching hotel stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchHospitalityStats = async (section) => {
+        try {
+            let response;
+            if (section === 'restaurant') response = await hospitalityAPI.getRestaurantBookings();
+            else if (section === 'pub') response = await hospitalityAPI.getPubBookings();
+            else if (section === 'function') response = await hospitalityAPI.getFunctionBookings();
+
+            if (response && response.data.success) {
+                setHospitalityStats({
+                    count: response.data.count,
+                    bookings: response.data.data
+                });
+            }
+        } catch (error) {
+            console.error(`Error fetching ${section} stats:`, error);
         } finally {
             setLoading(false);
         }
@@ -30,6 +56,42 @@ export default function Dashboard() {
         return <div className="loading">Loading dashboard...</div>;
     }
 
+    if (activeSection === 'restaurant' || activeSection === 'pub' || activeSection === 'function') {
+        const title = activeSection.charAt(0).toUpperCase() + activeSection.slice(1);
+        const Icon = activeSection === 'restaurant' ? Utensils : activeSection === 'pub' ? Beer : Calendar;
+
+        const newBookingsCount = hospitalityStats.bookings?.filter(b => b.status !== 'completed').length || 0;
+
+        return (
+            <div className="dashboard">
+                <div className="dashboard-header mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">{title} Dashboard</h1>
+                </div>
+                <div className="dashboard-stats">
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ backgroundColor: '#fff7ed' }}>
+                            <Icon size={24} color="#E3A048" />
+                        </div>
+                        <div className="stat-content">
+                            <p className="stat-title">Total Bookings</p>
+                            <h3 className="stat-value">{hospitalityStats.count}</h3>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ backgroundColor: '#fff7ed' }}>
+                            <Clock size={24} color="#E3A048" />
+                        </div>
+                        <div className="stat-content">
+                            <p className="stat-title">New Bookings</p>
+                            <h3 className="stat-value">{newBookingsCount}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Default Hotel Dashboard
     const statCards = [
         {
             title: 'Total Rooms',

@@ -273,6 +273,74 @@ const Home = () => {
                 </section>
             )}
 
+            {/* Discovery Section - Restaurant, Pub, Functions */}
+            <section className="py-24 bg-white border-t border-gray-100">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <span className="text-accent-gold tracking-widest text-sm font-semibold mb-4 block uppercase font-sans">DINING & EVENTS</span>
+                        <h2 className="text-4xl md:text-5xl font-serif text-primary">Experience More</h2>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {/* Restaurant Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="group relative h-[450px] overflow-hidden cursor-pointer"
+                        >
+                            <img src="/experience/Experience-resturent.jpg" alt="Restaurant" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                            <div className="absolute bottom-0 left-0 p-8 text-white w-full">
+                                <h3 className="text-3xl mb-2 font-serif">The Restaurant</h3>
+                                <p className="text-sm opacity-80 mb-6 line-clamp-2">Fine dining experiencing global flavors in an elegant setting.</p>
+                                <Link to="/restaurant" className="inline-block border border-white/30 hover:bg-white hover:text-black px-6 py-2 text-xs tracking-widest transition-all">
+                                    BOOK A TABLE
+                                </Link>
+                            </div>
+                        </motion.div>
+
+                        {/* Pub Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="group relative h-[450px] overflow-hidden cursor-pointer"
+                        >
+                            <img src="/experience/Experience-pub.jpg" alt="Pub" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                            <div className="absolute bottom-0 left-0 p-8 text-white w-full">
+                                <h3 className="text-3xl mb-2 font-serif">Leopard Pub</h3>
+                                <p className="text-sm opacity-80 mb-6 line-clamp-2">Craft beers, live sports, and a vibrant local atmosphere.</p>
+                                <Link to="/pub" className="inline-block border border-white/30 hover:bg-white hover:text-black px-6 py-2 text-xs tracking-widest transition-all">
+                                    VISIT PUB
+                                </Link>
+                            </div>
+                        </motion.div>
+
+                        {/* Function Room Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.4 }}
+                            className="group relative h-[450px] overflow-hidden cursor-pointer"
+                        >
+                            <img src="/experience/Experience-event.jpg" alt="Events" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                            <div className="absolute bottom-0 left-0 p-8 text-white w-full">
+                                <h3 className="text-3xl mb-2 font-serif">Private Events</h3>
+                                <p className="text-sm opacity-80 mb-6 line-clamp-2">Host weddings, conferences, and parties in our versatile venues.</p>
+                                <Link to="/functions" className="inline-block border border-white/30 hover:bg-white hover:text-black px-6 py-2 text-xs tracking-widest transition-all">
+                                    PLAN EVENT
+                                </Link>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Facilities Grid */}
             <section className="py-20 bg-white">
                 <div className="container mx-auto px-4 text-center">
@@ -299,7 +367,7 @@ const Home = () => {
                 <div
                     className="absolute inset-0 bg-fixed bg-cover bg-center"
                     style={{
-                        backgroundImage: "url('https://images.unsplash.com/photo-1507501336603-6e31db2be093?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')",
+                        backgroundImage: "url('/get-diraction/get-direction-photo.jpg')",
                     }}
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-60"></div>
@@ -313,8 +381,8 @@ const Home = () => {
                         GET DIRECTIONS
                     </Link>
                 </div>
-            </section>
-        </div>
+            </section >
+        </div >
     );
 };
 

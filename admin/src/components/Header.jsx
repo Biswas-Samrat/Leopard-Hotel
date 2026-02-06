@@ -1,11 +1,27 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User, X, Menu } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
+import { LogOut, User, X, Menu, Building, Utensils, Beer, Users, MessageSquare } from 'lucide-react';
 import './Header.css';
 
 export default function Header({ toggleSidebar }) {
     const { user, logout } = useAuth();
+    const { activeSection } = useAdmin();
+    const navigate = useNavigate();
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    const sections = [
+        { id: 'hotel', label: 'Hotel', icon: Building, path: '/' },
+        { id: 'restaurant', label: 'Restaurant', icon: Utensils, path: '/restaurant' },
+        { id: 'pub', label: 'Pub', icon: Beer, path: '/pub' },
+        { id: 'function', label: 'Function Room', icon: Users, path: '/function' },
+        { id: 'connection', label: 'Connection', icon: MessageSquare, path: '/connection' },
+    ];
+
+    const handleSectionClick = (path) => {
+        navigate(path);
+    };
 
     return (
         <header className="header">
@@ -14,8 +30,20 @@ export default function Header({ toggleSidebar }) {
                     <Menu size={24} />
                 </button>
 
-                <div className="header-title">
-                    <h1>{getPageTitle()}</h1>
+                <div className="section-tabs">
+                    {sections.map(section => {
+                        const Icon = section.icon;
+                        return (
+                            <button
+                                key={section.id}
+                                onClick={() => handleSectionClick(section.path)}
+                                className={`section-tab ${activeSection === section.id ? 'active' : ''}`}
+                            >
+                                <Icon size={18} />
+                                <span>{section.label}</span>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 <div className="header-actions">

@@ -1,15 +1,37 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home, CheckCircle } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
+import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home, CheckCircle, Utensils, Beer, History } from 'lucide-react';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen }) {
-    const menuItems = [
-        { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/rooms', label: 'Rooms', icon: Bed },
-        { path: '/booked-rooms', label: 'Booked Rooms', icon: CheckCircle },
-        { path: '/home-control', label: 'Home Control', icon: Home },
-        { path: '/settings', label: 'Settings', icon: Settings },
-    ];
+    const { activeSection } = useAdmin();
+
+    const allMenus = {
+        hotel: [
+            { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+            { path: '/rooms', label: 'Rooms', icon: Bed },
+            { path: '/booked-rooms', label: 'Booked Rooms', icon: CheckCircle },
+            { path: '/home-control', label: 'Home Control', icon: Home },
+            { path: '/settings', label: 'Settings', icon: Settings },
+        ],
+        restaurant: [
+            { path: '/restaurant', label: 'Rest. Dashboard', icon: LayoutDashboard },
+            { path: '/restaurant/bookings', label: 'Table Bookings', icon: Utensils },
+            { path: '/restaurant/history', label: 'Booking History', icon: History },
+        ],
+        pub: [
+            { path: '/pub', label: 'Pub Dashboard', icon: LayoutDashboard },
+            { path: '/pub/bookings', label: 'Table Bookings', icon: Beer },
+            { path: '/pub/history', label: 'Booking History', icon: History },
+        ],
+        function: [
+            { path: '/function', label: 'Func. Dashboard', icon: LayoutDashboard },
+            { path: '/function/enquiries', label: 'Event Enquiries', icon: Calendar },
+            { path: '/function/history', label: 'Event History', icon: History },
+        ]
+    };
+
+    const menuItems = allMenus[activeSection] || allMenus.hotel;
 
     return (
         <aside className={`sidebar ${isOpen ? 'active' : ''}`}>
@@ -26,7 +48,7 @@ export default function Sidebar({ isOpen }) {
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            end={item.path === '/'}
+                            end={['/', '/restaurant', '/pub', '/function'].includes(item.path)}
                             className={({ isActive }) =>
                                 `sidebar-link ${isActive ? 'active' : ''}`
                             }

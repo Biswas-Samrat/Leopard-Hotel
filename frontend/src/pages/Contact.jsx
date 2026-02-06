@@ -1,13 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { createContactMessage } from '../api';
 
 const Contact = () => {
-    const handleSubmit = (e) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        toast.success("Message sent! We'll get back to you shortly.");
-        e.target.reset();
+        setLoading(true);
+
+        try {
+            await createContactMessage(formData);
+            toast.success("Message sent! We'll get back to you shortly.");
+            setFormData({ name: '', email: '', subject: '', message: '' });
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -76,23 +99,55 @@ const Contact = () => {
                             <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">YOUR NAME</label>
-                                    <input type="text" className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all" required />
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
+                                        required
+                                    />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">EMAIL ADDRESS</label>
-                                    <input type="email" className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all" required />
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
+                                        required
+                                    />
                                 </div>
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">SUBJECT</label>
-                                    <input type="text" className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all" required />
+                                    <input
+                                        type="text"
+                                        name="subject"
+                                        value={formData.subject}
+                                        onChange={handleChange}
+                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
+                                        required
+                                    />
                                 </div>
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">MESSAGE</label>
-                                    <textarea rows="5" className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all" required></textarea>
+                                    <textarea
+                                        rows="5"
+                                        name="message"
+                                        value={formData.message}
+                                        onChange={handleChange}
+                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
+                                        required
+                                    ></textarea>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <button type="submit" className="flex items-center justify-center space-x-3 w-full md:w-auto px-12 py-4 bg-gray-900 text-white hover:bg-accent-gold transition-all tracking-widest text-sm font-bold">
-                                        <span>SEND MESSAGE</span>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex items-center justify-center space-x-3 w-full md:w-auto px-12 py-4 bg-gray-900 text-white hover:bg-accent-gold transition-all tracking-widest text-sm font-bold disabled:opacity-50"
+                                    >
+                                        <span>{loading ? 'SENDING...' : 'SEND MESSAGE'}</span>
                                         <Send size={18} />
                                     </button>
                                 </div>
