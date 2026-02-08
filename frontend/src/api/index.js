@@ -12,5 +12,6 @@ export const createRestaurantBooking = (data) => API.post('/hospitality/restaura
 export const createPubBooking = (data) => API.post('/hospitality/pub', data);
 export const createFunctionEnquiry = (data) => API.post('/hospitality/function', data);
 export const createContactMessage = (data) => API.post('/contact', data);
+export const fetchGalleryPhotos = (category) => API.get(`/gallery/${category}`);
 
 export default API;

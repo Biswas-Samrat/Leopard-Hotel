@@ -33,6 +33,7 @@ app.use('/api/rooms', require('./routes/roomRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/hospitality', require('./routes/hospitalityRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/gallery', require('./routes/galleryRoutes'));
 
 // Admin Routes
 app.use('/api/admin/auth', require('./admin/routes/authRoutes'));
@@ -44,6 +45,7 @@ app.use('/api/admin/upload', require('./admin/routes/uploadRoutes'));
 app.use('/api/admin/settings', require('./admin/routes/settingsRoutes'));
 app.use('/api/admin/hospitality', require('./admin/routes/hospitalityRoutes'));
 app.use('/api/admin/connection', require('./admin/routes/connectionRoutes'));
+app.use('/api/admin/gallery', require('./admin/routes/galleryRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

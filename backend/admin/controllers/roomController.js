@@ -1,5 +1,10 @@
 const path = require('path');
 const { pool } = require('../../config/mysql');
+const {
+    validateRequired,
+    validateNumeric,
+    validateMinLength
+} = require('../../utils/validation');
 
 // @desc    Get all rooms
 // @route   GET /api/admin/rooms
@@ -66,13 +71,18 @@ exports.createRoom = async (req, res) => {
         const { room_number, room_type, capacity, price_per_night, status, description, amenities } = req.body;
 
         // Validation
-        if (room_number === undefined || room_number === '' ||
-            room_type === undefined || room_type === '' ||
-            capacity === undefined || capacity === '' ||
-            price_per_night === undefined || price_per_night === '') {
+        const errors = [];
+        if (!validateRequired(room_number)) errors.push('Room number is required');
+        if (!validateRequired(room_type)) errors.push('Room type is required');
+        if (!validateRequired(capacity) || !validateNumeric(capacity)) errors.push('Capacity must be a number');
+        if (!validateRequired(price_per_night) || !validateNumeric(price_per_night)) errors.push('Price must be a number');
+        if (!validateRequired(description) || !validateMinLength(description, 10)) errors.push('Description must be at least 10 characters');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields: Room Number, Type, Capacity, and Price'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 
@@ -139,11 +149,41 @@ exports.updateRoom = async (req, res) => {
         // Dynamic update
         const fields = [];
         const values = [];
+        const errors = [];
 
-        if (room_number !== undefined) { fields.push('room_number = ?'); values.push(room_number); }
-        if (room_type !== undefined) { fields.push('room_type = ?'); values.push(room_type); }
-        if (capacity !== undefined) { fields.push('capacity = ?'); values.push(capacity); }
-        if (price_per_night !== undefined) { fields.push('price_per_night = ?'); values.push(price_per_night); }
+        if (room_number !== undefined) {
+            if (!validateRequired(room_number)) errors.push('Room number cannot be empty');
+            fields.push('room_number = ?');
+            values.push(room_number);
+        }
+        if (room_type !== undefined) {
+            if (!validateRequired(room_type)) errors.push('Room type cannot be empty');
+            fields.push('room_type = ?');
+            values.push(room_type);
+        }
+        if (capacity !== undefined) {
+            if (!validateNumeric(capacity)) errors.push('Capacity must be a number');
+            fields.push('capacity = ?');
+            values.push(capacity);
+        }
+        if (price_per_night !== undefined) {
+            if (!validateNumeric(price_per_night)) errors.push('Price must be a number');
+            fields.push('price_per_night = ?');
+            values.push(price_per_night);
+        }
+        if (description !== undefined) {
+            if (!validateMinLength(description, 10)) errors.push('Description must be at least 10 characters');
+            fields.push('description = ?');
+            values.push(description);
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: errors
+            });
+        }
         if (status !== undefined) { fields.push('status = ?'); values.push(status); }
         if (description !== undefined) { fields.push('description = ?'); values.push(description); }
         if (amenities !== undefined) { fields.push('amenities = ?'); values.push(amenities); }

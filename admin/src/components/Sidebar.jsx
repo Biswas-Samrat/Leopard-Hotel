@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
-import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home, CheckCircle, Utensils, Beer, History } from 'lucide-react';
+import { LayoutDashboard, Bed, Calendar, Users, Settings, Hotel, Home, CheckCircle, Utensils, Beer, History, Image as ImageIcon } from 'lucide-react';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen }) {
@@ -18,16 +18,19 @@ export default function Sidebar({ isOpen }) {
             { path: '/restaurant', label: 'Rest. Dashboard', icon: LayoutDashboard },
             { path: '/restaurant/bookings', label: 'Table Bookings', icon: Utensils },
             { path: '/restaurant/history', label: 'Booking History', icon: History },
+            { path: '/restaurant/gallery', label: 'Photo Gallery', icon: ImageIcon },
         ],
         pub: [
             { path: '/pub', label: 'Pub Dashboard', icon: LayoutDashboard },
             { path: '/pub/bookings', label: 'Table Bookings', icon: Beer },
             { path: '/pub/history', label: 'Booking History', icon: History },
+            { path: '/pub/gallery', label: 'Photo Gallery', icon: ImageIcon },
         ],
         function: [
             { path: '/function', label: 'Func. Dashboard', icon: LayoutDashboard },
             { path: '/function/enquiries', label: 'Event Enquiries', icon: Calendar },
             { path: '/function/history', label: 'Event History', icon: History },
+            { path: '/function/gallery', label: 'Photo Gallery', icon: ImageIcon },
         ]
     };
 

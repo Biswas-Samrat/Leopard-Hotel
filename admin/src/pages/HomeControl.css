@@ -264,12 +264,18 @@
     }
 
     .room-select-item {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
 
     .room-select-item select {
-        flex: 1;
-        min-width: 150px;
+        width: 100%;
+    }
+
+    .room-tiny-preview {
+        width: 100%;
+        height: 100px;
     }
 }
 

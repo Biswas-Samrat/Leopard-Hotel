@@ -1,4 +1,9 @@
 const { pool } = require('../config/mysql');
+const {
+    validateRequired,
+    validateEmail,
+    validateMinLength
+} = require('../utils/validation');
 
 // @desc    Submit a contact message
 // @route   POST /api/contact
@@ -7,10 +12,16 @@ exports.createMessage = async (req, res) => {
     try {
         const { name, email, subject, message } = req.body;
 
-        if (!name || !email || !message) {
+        const errors = [];
+        if (!validateRequired(name) || !validateMinLength(name, 2)) errors.push('Valid name is required (min 2 chars)');
+        if (!validateRequired(email) || !validateEmail(email)) errors.push('Valid email is required');
+        if (!validateRequired(message) || !validateMinLength(message, 10)) errors.push('Message is required (min 10 chars)');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide name, email and message'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 

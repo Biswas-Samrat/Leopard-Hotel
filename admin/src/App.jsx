@@ -11,6 +11,7 @@ import RestaurantBookings from './pages/RestaurantBookings';
 import PubBookings from './pages/PubBookings';
 import FunctionBookings from './pages/FunctionBookings';
 import Connection from './pages/Connection';
+import GalleryManagement from './pages/GalleryManagement';
 
 import HomeControl from './pages/HomeControl';
 import Layout from './components/Layout';
@@ -56,14 +57,17 @@ function AppRoutes() {
                 {/* Restaurant Routes */}
                 <Route path="restaurant/bookings" element={<RestaurantBookings />} />
                 <Route path="restaurant/history" element={<RestaurantBookings />} />
+                <Route path="restaurant/gallery" element={<GalleryManagement category="restaurant" title="Restaurant" />} />
 
                 {/* Pub Routes */}
                 <Route path="pub/bookings" element={<PubBookings />} />
                 <Route path="pub/history" element={<PubBookings />} />
+                <Route path="pub/gallery" element={<GalleryManagement category="pub" title="Pub" />} />
 
                 {/* Function Routes */}
                 <Route path="function/enquiries" element={<FunctionBookings />} />
                 <Route path="function/history" element={<FunctionBookings />} />
+                <Route path="function/gallery" element={<GalleryManagement category="function" title="Function Room" />} />
 
                 {/* Connection Route */}
                 <Route path="connection" element={<Connection />} />

@@ -114,4 +114,20 @@ export const settingsAPI = {
     update: (key, value) => api.put(`/admin/settings/${key}`, { value })
 };
 
+// Gallery API
+export const galleryAPI = {
+    getPhotos: (category) => api.get(`/admin/gallery/${category}`),
+    addPhoto: (category, formData) => api.post(`/admin/gallery/${category}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }),
+    replacePhoto: (photoId, formData) => api.put(`/admin/gallery/${photoId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }),
+    deletePhoto: (photoId) => api.delete(`/admin/gallery/${photoId}`)
+};
+
 export default api;

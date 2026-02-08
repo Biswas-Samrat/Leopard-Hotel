@@ -67,7 +67,7 @@ export default function Dashboard() {
                 <div className="dashboard-header mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">{title} Dashboard</h1>
                 </div>
-                <div className="dashboard-stats">
+                <div className="dashboard-stats responsive-grid">
                     <div className="stat-card">
                         <div className="stat-icon" style={{ backgroundColor: '#fff7ed' }}>
                             <Icon size={24} color="#E3A048" />
@@ -118,7 +118,7 @@ export default function Dashboard() {
 
     return (
         <div className="dashboard">
-            <div className="dashboard-stats">
+            <div className="dashboard-stats responsive-grid">
                 {statCards.map((card, index) => {
                     const Icon = card.icon;
                     return (

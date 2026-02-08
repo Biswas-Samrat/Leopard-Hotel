@@ -71,7 +71,7 @@ export default function Connection() {
                         <tbody>
                             {messages.map((msg) => (
                                 <tr key={msg.id}>
-                                    <td>
+                                    <td data-label="Sender Info">
                                         <div className="guest-wrapper">
                                             <div className="user-avatar bg-gray-100 text-gray-600">
                                                 <User size={16} />
@@ -84,7 +84,7 @@ export default function Connection() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Date">
                                         <div className="date-wrapper">
                                             <div className="date-item">
                                                 <Calendar size={16} className="text-accent-gold" />
@@ -95,7 +95,7 @@ export default function Connection() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Message">
                                         <div className="space-y-1">
                                             <div className="text-sm font-medium text-gray-800">
                                                 {msg.subject || '(No Subject)'}
@@ -105,7 +105,7 @@ export default function Connection() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Actions">
                                         <button
                                             onClick={() => handleDelete(msg.id)}
                                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-colors shadow-sm"

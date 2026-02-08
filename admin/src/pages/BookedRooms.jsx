@@ -106,13 +106,13 @@ export default function BookedRooms() {
                                 <tbody>
                                     {filteredRooms.map((room) => (
                                         <tr key={room.id}>
-                                            <td>
+                                            <td data-label="Room">
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <span style={{ fontWeight: 'bold', fontSize: '1.125rem' }}>Room {room.room_number}</span>
                                                 </div>
                                             </td>
-                                            <td>{room.room_type}</td>
-                                            <td>
+                                            <td data-label="Type">{room.room_type}</td>
+                                            <td data-label="Guest Detail">
                                                 {room.guest_name ? (
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: '500' }}>
@@ -126,7 +126,7 @@ export default function BookedRooms() {
                                                     <span style={{ color: '#94a3b8', fontStyle: 'italic', fontWeight: '300' }}>Details unavailable</span>
                                                 )}
                                             </td>
-                                            <td>
+                                            <td data-label="Period">
                                                 {room.check_in ? (
                                                     <div style={{ display: 'flex', flexDirection: 'column', fontSize: '0.875rem' }}>
                                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -138,10 +138,10 @@ export default function BookedRooms() {
                                                     <span style={{ color: '#94a3b8' }}>N/A</span>
                                                 )}
                                             </td>
-                                            <td>
+                                            <td data-label="Status">
                                                 <span className="badge badge-warning">Booked</span>
                                             </td>
-                                            <td style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <td data-label="Action" style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
                                                     className="btn btn-secondary"
                                                     style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchRoom, createBooking } from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Maximize, ArrowLeft, Check, Calendar, Mail, Phone, User, MessageSquare, Image, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, ArrowLeft, Check, Calendar, Mail, Phone, User, MessageSquare, Image, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const RoomDetails = () => {
@@ -13,6 +13,39 @@ const RoomDetails = () => {
     const [bookingLoading, setBookingLoading] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [errors, setErrors] = useState({});
+
+    const validateForm = (data) => {
+        const newErrors = {};
+        if (!data.guest_name.trim()) newErrors.guest_name = 'Name is required';
+        else if (data.guest_name.trim().length < 2) newErrors.guest_name = 'Name must be at least 2 characters';
+
+        if (!data.guest_email.trim()) newErrors.guest_email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guest_email)) newErrors.guest_email = 'Invalid email format';
+
+        if (!data.guest_phone.trim()) newErrors.guest_phone = 'Phone number is required';
+        else if (!/^[\d\+\-\s\(\)]{10,20}$/.test(data.guest_phone)) newErrors.guest_phone = 'Invalid phone number format';
+
+        if (!data.check_in) newErrors.check_in = 'Check-in is required';
+        if (!data.check_out) newErrors.check_out = 'Check-out is required';
+
+        if (data.check_in && data.check_out) {
+            if (new Date(data.check_in) >= new Date(data.check_out)) {
+                newErrors.check_out = 'Check-out must be after check-in';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const getNZToday = () => {
+        const date = new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     useEffect(() => {
         const loadRoom = async () => {
@@ -65,7 +98,6 @@ const RoomDetails = () => {
                         room_type: roomData.room_type,
                         price: parseFloat(roomData.price_per_night),
                         capacity: roomData.capacity,
-                        size: `${Math.floor(20 + roomData.capacity * 5)}m²`,
                         desc: roomData.description || `Experience comfort in our ${roomData.room_type.toLowerCase()} accommodation.`,
                         amenities: amenitiesList,
                         gridImages: gridImages,
@@ -100,15 +132,27 @@ const RoomDetails = () => {
             special_requests: formData.get('special_requests')
         };
 
+        if (!validateForm(bookingData)) {
+            setBookingLoading(false);
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         try {
             const response = await createBooking(bookingData);
             if (response.data.success) {
                 toast.success('Booking created successfully! We will contact you soon.');
+                setErrors({});
                 navigate('/rooms');
             }
         } catch (error) {
             console.error('Booking error:', error);
-            toast.error(error.response?.data?.message || 'Error creating booking');
+            const serverErrors = error.response?.data?.errors;
+            if (serverErrors && Array.isArray(serverErrors)) {
+                toast.error(serverErrors.join(', '));
+            } else {
+                toast.error(error.response?.data?.message || 'Error creating booking');
+            }
         } finally {
             setBookingLoading(false);
         }
@@ -153,10 +197,10 @@ const RoomDetails = () => {
                                         <input
                                             type="date"
                                             name="check_in"
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className="w-full bg-white border border-gray-200 px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors"
-                                            required
+                                            min={getNZToday()}
+                                            className={`w-full bg-white border ${errors.check_in ? 'border-red-500' : 'border-gray-200'} px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors`}
                                         />
+                                        {errors.check_in && <p className="text-red-500 text-[10px] mt-1">{errors.check_in}</p>}
                                     </div>
                                     <div className="relative group">
                                         <label className="text-[10px] tracking-widest text-gray-400 block mb-2 font-bold flex items-center">
@@ -165,10 +209,10 @@ const RoomDetails = () => {
                                         <input
                                             type="date"
                                             name="check_out"
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className="w-full bg-white border border-gray-200 px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors"
-                                            required
+                                            min={getNZToday()}
+                                            className={`w-full bg-white border ${errors.check_out ? 'border-red-500' : 'border-gray-200'} px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors`}
                                         />
+                                        {errors.check_out && <p className="text-red-500 text-[10px] mt-1">{errors.check_out}</p>}
                                     </div>
                                 </div>
 
@@ -180,9 +224,9 @@ const RoomDetails = () => {
                                         type="text"
                                         name="guest_name"
                                         placeholder="Enter your full name"
-                                        className="w-full bg-white border border-gray-200 px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors"
-                                        required
+                                        className={`w-full bg-white border ${errors.guest_name ? 'border-red-500' : 'border-gray-200'} px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors`}
                                     />
+                                    {errors.guest_name && <p className="text-red-500 text-[10px] mt-1">{errors.guest_name}</p>}
                                 </div>
 
                                 <div className="relative group">
@@ -193,9 +237,9 @@ const RoomDetails = () => {
                                         type="email"
                                         name="guest_email"
                                         placeholder="your@email.com"
-                                        className="w-full bg-white border border-gray-200 px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors"
-                                        required
+                                        className={`w-full bg-white border ${errors.guest_email ? 'border-red-500' : 'border-gray-200'} px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors`}
                                     />
+                                    {errors.guest_email && <p className="text-red-500 text-[10px] mt-1">{errors.guest_email}</p>}
                                 </div>
 
                                 <div className="relative group">
@@ -206,8 +250,9 @@ const RoomDetails = () => {
                                         type="tel"
                                         name="guest_phone"
                                         placeholder="+1 234 567 8900"
-                                        className="w-full bg-white border border-gray-200 px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors"
+                                        className={`w-full bg-white border ${errors.guest_phone ? 'border-red-500' : 'border-gray-200'} px-4 py-3 rounded-none focus:border-accent-gold outline-none text-sm transition-colors`}
                                     />
+                                    {errors.guest_phone && <p className="text-red-500 text-[10px] mt-1">{errors.guest_phone}</p>}
                                 </div>
 
                                 <div className="relative group">
@@ -298,10 +343,6 @@ const RoomDetails = () => {
                                 <div className="flex items-center">
                                     <Users size={18} className="mr-2 text-accent-gold" />
                                     {room.capacity} GUESTS
-                                </div>
-                                <div className="flex items-center">
-                                    <Maximize size={18} className="mr-2 text-accent-gold" />
-                                    {room.size} SPACE
                                 </div>
                                 <div className="flex items-center uppercase">
                                     <Check size={18} className="mr-1 text-green-500" />

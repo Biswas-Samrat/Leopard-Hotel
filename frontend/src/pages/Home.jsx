@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Wifi, Coffee, Utensils, Car, Users, Maximize, ArrowRight, ArrowUpRight, Heart, ShieldCheck, Clock } from 'lucide-react';
+import { Wifi, Coffee, Utensils, Car, Users, ArrowRight, ArrowUpRight, Heart, ShieldCheck, Clock } from 'lucide-react';
 import { fetchRooms, fetchSettings } from '../api';
 import toast from 'react-hot-toast';
 
@@ -39,7 +39,6 @@ const Home = () => {
                         return mainImg?.url || `https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`;
                     })(),
                     capacity: room.capacity,
-                    size: `${Math.floor(20 + room.capacity * 5)}m²`,
                     desc: room.description || `Experience comfort in our ${room.room_type.toLowerCase()} accommodation.`,
                     amenities: room.amenities ? room.amenities.split(',').map(a => a.trim()) : ['Free WiFi', 'Private Bathroom', 'TV'],
                 }));
@@ -257,7 +256,6 @@ const Home = () => {
                                         <h3 className="text-xl font-serif mb-3 text-gray-900">{room.name}</h3>
                                         <div className="flex items-center justify-center space-x-4 mb-4 text-gray-400 text-xs tracking-widest">
                                             <div className="flex items-center"><Users size={14} className="mr-1" /> {room.capacity} GUESTS</div>
-                                            <div className="flex items-center"><Maximize size={14} className="mr-1" /> {room.size}</div>
                                         </div>
                                         <Link
                                             to={`/rooms/${room.id}`}

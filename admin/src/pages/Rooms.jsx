@@ -290,7 +290,7 @@ export default function Rooms() {
 
                                 return (
                                     <tr key={room.id}>
-                                        <td>
+                                        <td data-label="Image">
                                             <div className="room-image-preview">
                                                 {mainImg ? (
                                                     <img
@@ -305,20 +305,20 @@ export default function Rooms() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td><strong>{room.room_number}</strong></td>
-                                        <td>{room.room_type}</td>
-                                        <td>{room.capacity} {room.capacity === 1 ? 'guest' : 'guests'}</td>
-                                        <td><strong>${room.price_per_night}</strong>/night</td>
-                                        <td>
+                                        <td data-label="Room Number"><strong>{room.room_number}</strong></td>
+                                        <td data-label="Type">{room.room_type}</td>
+                                        <td data-label="Capacity">{room.capacity} {room.capacity === 1 ? 'guest' : 'guests'}</td>
+                                        <td data-label="Price">{room.price_per_night}</td>
+                                        <td data-label="Status">
                                             <span className={`badge badge-${getStatusColor(room.status)}`}>
                                                 {room.status}
                                             </span>
                                         </td>
-                                        <td className="amenities-cell">
+                                        <td data-label="Amenities" className="amenities-cell">
                                             {room.amenities ? room.amenities.split(',').slice(0, 3).join(', ') : 'N/A'}
                                             {room.amenities && room.amenities.split(',').length > 3 && '...'}
                                         </td>
-                                        <td>
+                                        <td data-label="Actions">
                                             <div className="action-buttons">
                                                 <button
                                                     className="btn-icon"

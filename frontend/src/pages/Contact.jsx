@@ -12,22 +12,54 @@ const Contact = () => {
         message: ''
     });
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = 'Name is required';
+        else if (formData.name.trim().length < 2) newErrors.name = 'Name must be at least 2 characters';
+
+        if (!formData.email.trim()) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
+
+        if (!formData.subject.trim()) newErrors.subject = 'Subject is required';
+
+        if (!formData.message.trim()) newErrors.message = 'Message is required';
+        else if (formData.message.trim().length < 10) newErrors.message = 'Message must be at least 10 characters';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setLoading(true);
 
         try {
-            await createContactMessage(formData);
-            toast.success("Message sent! We'll get back to you shortly.");
-            setFormData({ name: '', email: '', subject: '', message: '' });
+            const response = await createContactMessage(formData);
+            if (response.data.success) {
+                toast.success("Message sent! We'll get back to you shortly.");
+                setFormData({ name: '', email: '', subject: '', message: '' });
+                setErrors({});
+            }
         } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+            console.error('Contact error:', error);
+            const serverErrors = error.response?.data?.errors;
+            if (serverErrors && Array.isArray(serverErrors)) {
+                toast.error(serverErrors.join(', '));
+            } else {
+                toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -104,9 +136,9 @@ const Contact = () => {
                                         name="name"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
-                                        required
+                                        className={`w-full border-b-2 ${errors.name ? 'border-red-500' : 'border-gray-100'} py-3 focus:border-accent-gold outline-none transition-all`}
                                     />
+                                    {errors.name && <p className="text-red-500 text-[10px] mt-1">{errors.name}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">EMAIL ADDRESS</label>
@@ -115,9 +147,9 @@ const Contact = () => {
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
-                                        required
+                                        className={`w-full border-b-2 ${errors.email ? 'border-red-500' : 'border-gray-100'} py-3 focus:border-accent-gold outline-none transition-all`}
                                     />
+                                    {errors.email && <p className="text-red-500 text-[10px] mt-1">{errors.email}</p>}
                                 </div>
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">SUBJECT</label>
@@ -126,9 +158,9 @@ const Contact = () => {
                                         name="subject"
                                         value={formData.subject}
                                         onChange={handleChange}
-                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
-                                        required
+                                        className={`w-full border-b-2 ${errors.subject ? 'border-red-500' : 'border-gray-100'} py-3 focus:border-accent-gold outline-none transition-all`}
                                     />
+                                    {errors.subject && <p className="text-red-500 text-[10px] mt-1">{errors.subject}</p>}
                                 </div>
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-xs font-bold tracking-[0.2em] text-gray-400">MESSAGE</label>
@@ -137,9 +169,9 @@ const Contact = () => {
                                         name="message"
                                         value={formData.message}
                                         onChange={handleChange}
-                                        className="w-full border-b-2 border-gray-100 py-3 focus:border-accent-gold outline-none transition-all"
-                                        required
+                                        className={`w-full border-b-2 ${errors.message ? 'border-red-500' : 'border-gray-100'} py-3 focus:border-accent-gold outline-none transition-all`}
                                     ></textarea>
+                                    {errors.message && <p className="text-red-500 text-[10px] mt-1">{errors.message}</p>}
                                 </div>
                                 <div className="md:col-span-2">
                                     <button

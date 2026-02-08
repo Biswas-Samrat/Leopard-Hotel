@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Maximize, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Users, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { fetchRooms } from '../api';
@@ -37,7 +37,6 @@ const Rooms = () => {
                         return mainImg?.url || `https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80`;
                     })(),
                     capacity: room.capacity,
-                    size: `${Math.floor(20 + room.capacity * 5)}m²`,
                     desc: room.description || `Experience comfort in our ${room.room_type.toLowerCase()} accommodation.`,
                     amenities: room.amenities ? room.amenities.split(',').map(a => a.trim()) : ['Free WiFi', 'Private Bathroom', 'TV'],
                     status: room.status,
@@ -301,9 +300,6 @@ const Rooms = () => {
                                     <div className="flex items-center space-x-4 mb-2 text-gray-400 text-[9px] tracking-widest">
                                         <div className="flex items-center">
                                             <Users size={16} className="mr-2" /> {room.capacity} GUESTS
-                                        </div>
-                                        <div className="flex items-center">
-                                            <Maximize size={16} className="mr-2" /> {room.size}
                                         </div>
                                     </div>
 

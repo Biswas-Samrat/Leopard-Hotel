@@ -25,6 +25,19 @@ const guestDocumentStorage = new CloudinaryStorage({
     }
 });
 
+// Configure Cloudinary Storage for Gallery Images
+const galleryStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'leopard-hotel/gallery',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        transformation: [
+            { width: 1600, height: 1200, crop: 'limit' },
+            { quality: 'auto:good' }
+        ]
+    }
+});
+
 // Configure Cloudinary Storage for General Uploads
 const generalStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
@@ -67,6 +80,14 @@ const uploadGeneral = multer({
     }
 });
 
+const uploadGallery = multer({
+    storage: galleryStorage,
+    fileFilter: imageFileFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+});
+
 // Helper function to delete image from Cloudinary
 const deleteImage = async (publicId) => {
     try {
@@ -87,6 +108,7 @@ module.exports = {
     uploadRoomImage,
     uploadGuestDocument,
     uploadGeneral,
+    uploadGallery,
     deleteImage,
     getImageUrl,
     cloudinary

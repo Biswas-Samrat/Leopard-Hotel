@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Utensils, Zap, Clock, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Utensils, Zap, Clock, Users, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { createRestaurantBooking } from '../api';
+import { createRestaurantBooking, fetchGalleryPhotos } from '../api';
 
 const Restaurant = () => {
     const [step, setStep] = useState(1);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [currentMonth, setCurrentMonth] = useState(new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Auckland" })));
     const [bookingData, setBookingData] = useState({
         name: '',
         email: '',
@@ -16,7 +16,103 @@ const Restaurant = () => {
         guests: 2,
         special_requests: ''
     });
+    const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!bookingData.name.trim()) newErrors.name = 'Name is required';
+        else if (bookingData.name.trim().length < 2) newErrors.name = 'Name must be at least 2 characters';
+
+        if (!bookingData.email.trim()) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bookingData.email)) newErrors.email = 'Invalid email format';
+
+        if (!bookingData.phone.trim()) newErrors.phone = 'Phone number is required';
+        else if (!/^[\d\+\-\s\(\)]{10,20}$/.test(bookingData.phone)) newErrors.phone = 'Invalid phone number (min 10 digits)';
+
+        if (!bookingData.date) newErrors.date = 'Date is required';
+        if (!bookingData.time) newErrors.time = 'Time is required';
+        if (!bookingData.guests || bookingData.guests <= 0) newErrors.guests = 'Must have at least 1 guest';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+    const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+    const [modalPhotoIndex, setModalPhotoIndex] = useState(0);
+
+    const [galleryImages, setGalleryImages] = useState([]);
+    const [itemsToShow, setItemsToShow] = useState(3);
+
+    React.useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setItemsToShow(1.2);
+            } else {
+                setItemsToShow(3);
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    React.useEffect(() => {
+        const loadGallery = async () => {
+            try {
+                const response = await fetchGalleryPhotos('restaurant');
+                if (response.data.success && response.data.data.length > 0) {
+                    setGalleryImages(response.data.data.map(p => p.image_url));
+                }
+            } catch (error) {
+                console.error('Error fetching restaurant gallery:', error);
+            }
+        };
+        loadGallery();
+    }, []);
+
+    // For smooth looping, we display clones of the first few images at the end
+    const displayImages = [...galleryImages, ...galleryImages.slice(0, 4)];
+
+    const [isPaused, setIsPaused] = useState(false);
+
+    // Auto-advance gallery every 5 seconds
+    React.useEffect(() => {
+        if (isPaused) return;
+        const timer = setInterval(() => {
+            setCurrentGalleryIndex((prev) => (prev + 1));
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [isPaused]);
+
+    // Handle seamless loop jump
+    React.useEffect(() => {
+        if (currentGalleryIndex >= galleryImages.length) {
+            const timer = setTimeout(() => {
+                setCurrentGalleryIndex(0);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else if (currentGalleryIndex < 0) {
+            // Support backward wrapping
+            setCurrentGalleryIndex(galleryImages.length - 1);
+        }
+    }, [currentGalleryIndex, galleryImages.length]);
+
+    const handleNext = () => {
+        setCurrentGalleryIndex(prev => prev + 1);
+    };
+
+    const handlePrev = () => {
+        setCurrentGalleryIndex(prev => prev - 1);
+    };
+
+    const handleNextPhoto = () => {
+        setModalPhotoIndex((prev) => (prev + 1) % galleryImages.length);
+    };
+
+    const handlePrevPhoto = () => {
+        setModalPhotoIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+    };
 
     // Calendar Helper Functions
     const getDaysInMonth = (date) => {
@@ -25,7 +121,8 @@ const Restaurant = () => {
         const days = new Date(year, month + 1, 0).getDate();
         const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
 
-        const today = new Date();
+        // Use New Zealand time for "today"
+        const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
         today.setHours(0, 0, 0, 0);
 
         const daysArray = [];
@@ -72,19 +169,38 @@ const Restaurant = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setLoading(true);
         try {
-            const { data } = await createRestaurantBooking(bookingData);
-            if (data.success) {
-                toast.success('Table booked successfully!');
-                setBookingData({ name: '', email: '', phone: '', date: '', time: '', guests: 2, special_requests: '' });
-                setStep(1); // Reset wizard
-            } else {
-                toast.error(data.message || 'Something went wrong');
+            const response = await createRestaurantBooking(bookingData);
+            if (response.data.success) {
+                toast.success('Reservation successful!');
+                setStep(1);
+                setBookingData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    date: '',
+                    time: '',
+                    guests: 2,
+                    special_requests: ''
+                });
+                setErrors({});
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to book table');
+            console.error('Booking error:', error);
+            const serverErrors = error.response?.data?.errors;
+            if (serverErrors && Array.isArray(serverErrors)) {
+                toast.error(serverErrors.join(', '));
+            } else {
+                toast.error(error.response?.data?.message || 'Something went wrong');
+            }
         } finally {
             setLoading(false);
         }
@@ -142,6 +258,143 @@ const Restaurant = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Photo Section */}
+            <section className="py-20 bg-white overflow-hidden">
+                <div className="container mx-auto px-4 mb-10 text-center">
+                    <span className="text-accent-gold tracking-[0.5em] text-xs font-light mb-4 block">VISUAL EXPERIENCE</span>
+                    <h2 className="text-4xl md:text-5xl font-serif mb-6">Our Atmosphere</h2>
+                    <div className="w-20 h-1 bg-accent-gold mx-auto mb-12"></div>
+                </div>
+
+                <div
+                    className="relative w-full group px-4 md:px-12"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                >
+                    {/* Navigation Arrows - Centered precisely on images */}
+                    <button
+                        onClick={handlePrev}
+                        className="absolute left-0 md:left-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 backdrop-blur-md hover:bg-white p-5 rounded-full shadow-2xl text-gray-900 transition-all duration-300 hover:scale-110 flex items-center justify-center border border-gray-100"
+                    >
+                        <ChevronLeft size={32} />
+                    </button>
+
+                    <button
+                        onClick={handleNext}
+                        className="absolute right-0 md:right-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 backdrop-blur-md hover:bg-white p-5 rounded-full shadow-2xl text-gray-900 transition-all duration-300 hover:scale-110 flex items-center justify-center border border-gray-100"
+                    >
+                        <ChevronRight size={32} />
+                    </button>
+
+                    <div className="overflow-hidden rounded-3xl">
+                        <motion.div
+                            className="flex cursor-grab active:cursor-grabbing"
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={0.1}
+                            dragMomentum={false}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                const swipe = offset.x;
+                                const swipeVelocity = velocity.x;
+
+                                if (swipe < -50 || swipeVelocity < -300) {
+                                    handleNext();
+                                } else if (swipe > 50 || swipeVelocity > 300) {
+                                    handlePrev();
+                                }
+                            }}
+                            animate={{
+                                x: `-${currentGalleryIndex * (100 / displayImages.length)}%`
+                            }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 120,
+                                damping: 25,
+                                mass: 0.5,
+                                bounce: 0
+                            }}
+                            style={{
+                                display: 'flex',
+                                width: `${(displayImages.length / itemsToShow) * 100}%`
+                            }}
+                        >
+                            {displayImages.map((img, idx) => (
+                                <div key={idx} className="px-3" style={{ width: `${100 / displayImages.length}%` }}>
+                                    <div className="relative group/item overflow-hidden rounded-3xl aspect-[4/3] shadow-lg border border-gray-100">
+                                        <img
+                                            src={img}
+                                            alt={`Restaurant Gallery ${idx % galleryImages.length + 1}`}
+                                            className="w-full h-full object-cover transition-transform duration-1000 group-hover/item:scale-105 pointer-events-none"
+                                        />
+                                        <div className="absolute inset-0 bg-black/10 group-hover/item:bg-black/40 transition-all duration-500 flex items-center justify-center opacity-0 group-hover/item:opacity-100">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setModalPhotoIndex(idx % galleryImages.length);
+                                                    setIsGalleryModalOpen(true);
+                                                }}
+                                                className="bg-white p-5 rounded-full text-gray-900 transform translate-y-6 group-hover/item:translate-y-0 transition-all duration-500 shadow-2xl hover:bg-accent-gold hover:text-white"
+                                            >
+                                                <Maximize2 size={32} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                </div>
+
+                <div className="flex justify-center mt-16">
+                    <button
+                        onClick={() => setIsGalleryModalOpen(true)}
+                        className="px-12 py-4 bg-[#1a1a1a] text-white tracking-widest text-xs font-bold hover:bg-accent-gold transition-colors duration-300 shadow-xl"
+                    >
+                        VIEW ALL PHOTOS
+                    </button>
+                </div>
+            </section>
+
+            {/* Lightbox Modal */}
+            {isGalleryModalOpen && (
+                <div className="fixed inset-0 z-[100] bg-black bg-opacity-95 flex items-center justify-center p-4 md:p-10">
+                    <button
+                        onClick={() => setIsGalleryModalOpen(false)}
+                        className="absolute top-6 right-6 text-white hover:text-accent-gold transition-colors z-[110]"
+                    >
+                        <X size={32} />
+                    </button>
+
+                    <button
+                        onClick={handlePrevPhoto}
+                        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3 rounded-full text-white transition-all"
+                    >
+                        <ChevronLeft size={32} />
+                    </button>
+
+                    <div className="max-w-6xl w-full h-full flex flex-col items-center justify-center">
+                        <motion.img
+                            key={modalPhotoIndex}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            src={galleryImages[modalPhotoIndex]}
+                            alt={`Gallery view ${modalPhotoIndex + 1}`}
+                            className="max-h-[80vh] w-auto object-contain shadow-2xl rounded-sm"
+                        />
+                        <div className="mt-8 text-white/60 tracking-widest text-sm">
+                            {modalPhotoIndex + 1} / {galleryImages.length}
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleNextPhoto}
+                        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-3 rounded-full text-white transition-all"
+                    >
+                        <ChevronRight size={32} />
+                    </button>
+                </div>
+            )}
 
             {/* Menu Section */}
             <section className="py-24 bg-gray-50">
@@ -374,32 +627,39 @@ const Restaurant = () => {
                                     </div>
 
                                     <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={bookingData.name}
-                                            onChange={handleChange}
-                                            placeholder="Your Name"
-                                            required
-                                            className="w-full px-6 py-4 rounded-xl border border-gray-200 focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium"
-                                        />
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            value={bookingData.phone}
-                                            onChange={handleChange}
-                                            placeholder="Phone Number"
-                                            required
-                                            className="w-full px-6 py-4 rounded-xl border border-gray-200 focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium"
-                                        />
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={bookingData.email}
-                                            onChange={handleChange}
-                                            placeholder="Email (Optional)"
-                                            className="w-full px-6 py-4 rounded-xl border border-gray-200 focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium"
-                                        />
+                                        <div className="space-y-1">
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={bookingData.name}
+                                                onChange={handleChange}
+                                                placeholder="Your Name"
+                                                className={`w-full px-6 py-4 rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-200'} focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium`}
+                                            />
+                                            {errors.name && <p className="text-red-500 text-sm ml-2">{errors.name}</p>}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                value={bookingData.phone}
+                                                onChange={handleChange}
+                                                placeholder="Phone Number"
+                                                className={`w-full px-6 py-4 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-200'} focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium`}
+                                            />
+                                            {errors.phone && <p className="text-red-500 text-sm ml-2">{errors.phone}</p>}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={bookingData.email}
+                                                onChange={handleChange}
+                                                placeholder="Email"
+                                                className={`w-full px-6 py-4 rounded-xl border ${errors.email ? 'border-red-500' : 'border-gray-200'} focus:border-[#E3A048] focus:ring-0 outline-none bg-white font-medium`}
+                                            />
+                                            {errors.email && <p className="text-red-500 text-sm ml-2">{errors.email}</p>}
+                                        </div>
                                         <textarea
                                             name="special_requests"
                                             value={bookingData.special_requests}

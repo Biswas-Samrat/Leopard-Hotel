@@ -110,7 +110,7 @@ export default function FunctionBookings() {
                         <tbody>
                             {displayedBookings.map((booking) => (
                                 <tr key={booking.id}>
-                                    <td>
+                                    <td data-label="Contact Info">
                                         <div className="guest-wrapper">
                                             <div className="user-avatar bg-blue-100 text-blue-600">
                                                 {booking.name?.charAt(0).toUpperCase() || '?'}
@@ -128,7 +128,7 @@ export default function FunctionBookings() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Event Date">
                                         <div className="date-wrapper">
                                             <div className="date-item">
                                                 <Calendar size={16} className="text-accent-gold" />
@@ -136,13 +136,13 @@ export default function FunctionBookings() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Guests">
                                         <div className="date-item">
                                             <Users size={16} color="#94a3b8" />
                                             <span>{booking.guests}</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Event Type & Details">
                                         <div className="space-y-1">
                                             <div className="text-sm font-medium text-gray-800">{booking.event_type}</div>
                                             {booking.details && (
@@ -157,7 +157,7 @@ export default function FunctionBookings() {
                                     </td>
 
                                     {isHistory && (
-                                        <td>
+                                        <td data-label="Actions">
                                             <div className="flex items-center gap-2">
                                                 <span className="status-badge bg-green-100 text-green-700">
                                                     Completed
@@ -176,7 +176,7 @@ export default function FunctionBookings() {
                                     )}
 
                                     {!isHistory && (
-                                        <td>
+                                        <td data-label="Actions">
                                             <button
                                                 onClick={() => handleComplete(booking.id)}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm"

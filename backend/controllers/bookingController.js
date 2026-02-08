@@ -1,5 +1,13 @@
 const path = require('path');
 const { pool } = require(path.join(__dirname, '../config/mysql'));
+const {
+    validateRequired,
+    validateEmail,
+    validatePhone,
+    validateNumeric,
+    validateDate,
+    validateMinLength
+} = require('../utils/validation');
 
 // @desc    Create new booking
 // @route   POST /api/bookings
@@ -8,11 +16,21 @@ exports.createBooking = async (req, res, next) => {
     try {
         const { room_id, guest_name, guest_email, guest_phone, check_in, check_out, guests, special_requests } = req.body;
 
-        // Validate required fields
-        if (!room_id || !guest_name || !guest_email || !check_in || !check_out) {
+        // Validation
+        const errors = [];
+        if (!validateRequired(room_id)) errors.push('Room selection is required');
+        if (!validateRequired(guest_name) || !validateMinLength(guest_name, 2)) errors.push('Valid name is required (min 2 chars)');
+        if (!validateRequired(guest_email) || !validateEmail(guest_email)) errors.push('Valid email is required');
+        if (!validateRequired(guest_phone) || !validatePhone(guest_phone)) errors.push('Valid phone number is required');
+        if (!validateRequired(check_in) || !validateDate(check_in)) errors.push('Valid check-in date is required');
+        if (!validateRequired(check_out) || !validateDate(check_out)) errors.push('Valid check-out date is required');
+        if (check_in && check_out && new Date(check_in) >= new Date(check_out)) errors.push('Check-out date must be after check-in');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields: room_id, guest_name, guest_email, check_in, check_out'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 

@@ -1,5 +1,13 @@
 const path = require('path');
 const { pool } = require(path.join(__dirname, '../config/mysql'));
+const {
+    validateRequired,
+    validateEmail,
+    validatePhone,
+    validateNumeric,
+    validateDate,
+    validateMinLength
+} = require('../utils/validation');
 
 // @desc    Create new restaurant booking
 // @route   POST /api/hospitality/restaurant
@@ -8,10 +16,20 @@ exports.createRestaurantBooking = async (req, res, next) => {
     try {
         const { name, email, phone, date, time, guests, special_requests } = req.body;
 
-        if (!name || !email || !date || !time || !guests) {
+        // Validation
+        const errors = [];
+        if (!validateRequired(name) || !validateMinLength(name, 2)) errors.push('Valid name is required (min 2 chars)');
+        if (!validateRequired(email) || !validateEmail(email)) errors.push('Valid email is required');
+        if (!validateRequired(phone) || !validatePhone(phone)) errors.push('Valid phone number is required');
+        if (!validateRequired(date) || !validateDate(date)) errors.push('Valid date is required');
+        if (!validateRequired(time)) errors.push('Time is required');
+        if (!validateRequired(guests) || !validateNumeric(guests) || parseInt(guests) <= 0) errors.push('Number of guests must be a positive number');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 
@@ -44,10 +62,20 @@ exports.createPubBooking = async (req, res, next) => {
     try {
         const { name, email, phone, date, time, guests, special_requests } = req.body;
 
-        if (!name || !email || !date || !time || !guests) {
+        // Validation
+        const errors = [];
+        if (!validateRequired(name) || !validateMinLength(name, 2)) errors.push('Valid name is required (min 2 chars)');
+        if (!validateRequired(email) || !validateEmail(email)) errors.push('Valid email is required');
+        if (!validateRequired(phone) || !validatePhone(phone)) errors.push('Valid phone number is required');
+        if (!validateRequired(date) || !validateDate(date)) errors.push('Valid date is required');
+        if (!validateRequired(time)) errors.push('Time is required');
+        if (!validateRequired(guests) || !validateNumeric(guests) || parseInt(guests) <= 0) errors.push('Number of guests must be a positive number');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 
@@ -80,10 +108,19 @@ exports.createFunctionBooking = async (req, res, next) => {
     try {
         const { name, email, phone, event_type, date, guests, details } = req.body;
 
-        if (!name || !email || !event_type || !date) {
+        // Validation
+        const errors = [];
+        if (!validateRequired(name) || !validateMinLength(name, 2)) errors.push('Valid name is required (min 2 chars)');
+        if (!validateRequired(email) || !validateEmail(email)) errors.push('Valid email is required');
+        if (!validateRequired(phone) || !validatePhone(phone)) errors.push('Valid phone number is required');
+        if (!validateRequired(event_type)) errors.push('Event type is required');
+        if (!validateRequired(date) || !validateDate(date)) errors.push('Valid date is required');
+
+        if (errors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'Validation failed',
+                errors: errors
             });
         }
 
